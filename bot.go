@@ -8,6 +8,8 @@ import (
 	"github.com/SURETLY/GO-SDK"
 )
 
+const intSet = "012"
+
 func main() {
 	sur := gosdk.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
 
@@ -17,6 +19,7 @@ func main() {
 	if err.Msg != "" {
 		os.Exit(1)
 	}
+	fmt.Println(loan)
 	println(time.Now().Format("15:04:05"), "Принимаем заявку на «Микрозайм под поручительство» соответствующую лимитам...")
 	time.Sleep(2 * time.Second)
 	println(time.Now().Format("15:04:05"), "Идентифицируем Заемщика...")
@@ -86,7 +89,7 @@ func main() {
 	id, err := sur.OrderNew(newOrder)
 	fmt.Println(time.Now().Format("15:04:05"), "id новой заявки:", id.Id)
 	if err.Msg != "" {
-		fmt.Println("Ошибка OrderNew", err.Msg)
+		fmt.Println("Ошибка OrderNew", err)
 	}
 	time.Sleep(1 * time.Second)
 
@@ -96,14 +99,14 @@ func main() {
 	status, err := sur.OrderStatus(id.Id)
 	fmt.Println(time.Now().Format("15:04:05"), "Статус новой заявки:", status)
 	if err.Msg != "" {
-		fmt.Println("Ошибка OrderStatus", err.Msg)
+		fmt.Println("Ошибка OrderStatus", err)
 	}
 
 	// и выгружаем договор по данной заявке
 	fmt.Println(time.Now().Format("15:04:05"), "Получаем договор для заемщика")
 	text, err := sur.ContractGet(id.Id)
 	if err.Msg != "" {
-		fmt.Println("Ошибка ContractGet", err.Msg)
+		fmt.Println("Ошибка ContractGet", err)
 	}
 	time.Sleep(2 * time.Second)
 	println(text)
@@ -113,11 +116,12 @@ func main() {
 	time.Sleep(3 * time.Second)
 
 	// эмулируем случайным образом согласие заемщика
-	if rand.Float32() > 0.5 {
+	success := gosdk.StringWithCharset(1, intSet) == "2"
+	if success {
 		println(time.Now().Format("15:04:05"), "Заемщик подписал договор")
 		err = sur.ContractAccept(id.Id)
 		if err.Msg != "" {
-			fmt.Println("Ошибка ContractAccept", err.Msg)
+			fmt.Println("Ошибка ContractAccept", err)
 		}
 		println(time.Now().Format("15:04:05"), "Идет поиск поручителей...")
 	} else {
@@ -130,9 +134,10 @@ func main() {
 	for i := false; i != true; {
 		status, err = sur.OrderStatus(id.Id)
 		if err.Msg != "" {
-			println(time.Now().Format("15:04:05"), "Ошибка на стороне сервера", err.Msg)
+			fmt.Println(time.Now().Format("15:04:05"), "Ошибка на стороне сервера", err)
 			os.Exit(1)
 		}
+		fmt.Println(status.Status)
 		time.Sleep(3 * time.Second)
 
 		switch status.Status {
@@ -152,7 +157,7 @@ func main() {
 	}
 
 	// эмулируем случайным образом выдачу займа
-	if rand.Float32() > 0.5 {
+	if success {
 		println(time.Now().Format("15:04:05"), "Заявка оплачена и выдана")
 		err = sur.OrderIssued(id.Id)
 		if err.Msg != "" {
@@ -167,24 +172,25 @@ func main() {
 	println(time.Now().Format("15:04:05"), "Ожидание возврата займа")
 	time.Sleep(5 * time.Second)
 
-	switch rand.Int31n(3) {
-	case 0:
+	switch gosdk.StringWithCharset(1, intSet) {
+	case "0":
 		err = sur.OrderUnpaid(id.Id)
 		println(time.Now().Format("15:04:05"), "Займ не выплачен")
 		if err.Msg != "" {
 			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderUnpaid", err)
 		}
 		break
-	case 1:
+	case "1":
 		err = sur.OrderPaid(id.Id)
 		println(time.Now().Format("15:04:05"), "Займ выплачен полностью")
 		if err.Msg != "" {
 			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderPaid", err)
 		}
 		break
-	case 2:
-		err = sur.OrderPartialPaid(id.Id, rand.Float32()*loan.MaxSum/2)
-		println(time.Now().Format("15:04:05"), "Займ выплачен частично")
+	case "2":
+		sum := rand.Float32() * loan.MaxSum / 2
+		err = sur.OrderPartialPaid(id.Id, sum)
+		fmt.Println(time.Now().Format("15:04:05"), "Займ выплачен частично", sum)
 		if err.Msg != "" {
 			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderPartialPaid", err)
 		}
