@@ -13,24 +13,24 @@ const intSet = "012"
 func main() {
 	sur := gosdk.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
 
-	println(time.Now().Format("15:04:05"), "Получаем лимиты на заявку...")
+	println(curTime(), "Получаем лимиты на заявку...")
 	// получили лимиты на заявку
 	loan, err := sur.Options()
 	if err.Msg != "" {
 		os.Exit(1)
 	}
 	fmt.Println(loan)
-	println(time.Now().Format("15:04:05"), "Принимаем заявку на «Микрозайм под поручительство» соответствующую лимитам...")
+	println(curTime(), "Принимаем заявку на «Микрозайм под поручительство» соответствующую лимитам...")
 	time.Sleep(2 * time.Second)
-	println(time.Now().Format("15:04:05"), "Идентифицируем Заемщика...")
+	println(curTime(), "Идентифицируем Заемщика...")
 	time.Sleep(2 * time.Second)
 
 	// генерим внутренний uid заявки
-	println(time.Now().Format("15:04:05"), "Генерим внутренний uid заявки...")
+	println(curTime(), "Генерим внутренний uid заявки...")
 	time.Sleep(2 * time.Second)
 
 	// отправляем данные для заявкки, получаем id заявки
-	println(time.Now().Format("15:04:05"), "Отправляем Suretly данные договора займа...")
+	println(curTime(), "Отправляем Suretly данные договора займа...")
 	uid := gosdk.StringWithCharset(16, gosdk.Charset)
 	newOrder := gosdk.OrderNew{
 		Uid:    uid,
@@ -80,31 +80,31 @@ func main() {
 			},
 		},
 		UserCreditScore: 678,
-		LoanSum:         loan.MaxSum / 2,
-		LoanTerm:        loan.MaxTerm / 2,
+		LoanSum:         rand.Float32() * loan.MaxSum / 2,
+		LoanTerm:        rand.Intn(loan.MaxTerm) / 2,
 		LoanRate:        38.1,
 		CurrencyCode:    "RUB",
-		Callback:        "callback",
+		Callback:        "https://anyurl.com/callback",
 	}
-	id, err := sur.OrderNew(newOrder)
-	fmt.Println(time.Now().Format("15:04:05"), "id новой заявки:", id.Id)
+	order, err := sur.OrderNew(newOrder)
+	fmt.Println(curTime(), "id новой заявки:", order.Id)
 	if err.Msg != "" {
 		fmt.Println("Ошибка OrderNew", err)
 	}
 	time.Sleep(1 * time.Second)
 
 	// по id заявки проверяем статус
-	fmt.Println(time.Now().Format("15:04:05"), "Проверяем статус новой заявки")
+	fmt.Println(curTime(), "Проверяем статус новой заявки")
 	time.Sleep(2 * time.Second)
-	status, err := sur.OrderStatus(id.Id)
-	fmt.Println(time.Now().Format("15:04:05"), "Статус новой заявки:", status)
+	status, err := sur.OrderStatus(order.Id)
+	fmt.Println(curTime(), "Статус новой заявки:", status)
 	if err.Msg != "" {
 		fmt.Println("Ошибка OrderStatus", err)
 	}
 
 	// и выгружаем договор по данной заявке
-	fmt.Println(time.Now().Format("15:04:05"), "Получаем договор для заемщика")
-	text, err := sur.ContractGet(id.Id)
+	fmt.Println(curTime(), "Получаем договор для заемщика")
+	text, err := sur.ContractGet(order.Id)
 	if err.Msg != "" {
 		fmt.Println("Ошибка ContractGet", err)
 	}
@@ -112,44 +112,44 @@ func main() {
 	println(text)
 	time.Sleep(5 * time.Second)
 
-	fmt.Println(time.Now().Format("15:04:05"), "Ожидаем подтверждение от заемщика")
+	fmt.Println(curTime(), "Ожидаем подтверждение от заемщика")
 	time.Sleep(3 * time.Second)
 
 	// эмулируем случайным образом согласие заемщика
 	success := gosdk.StringWithCharset(1, intSet) == "2"
 	if success {
-		println(time.Now().Format("15:04:05"), "Заемщик подписал договор")
-		err = sur.ContractAccept(id.Id)
+		println(curTime(), "Заемщик подписал договор")
+		err = sur.ContractAccept(order.Id)
 		if err.Msg != "" {
 			fmt.Println("Ошибка ContractAccept", err)
 		}
-		println(time.Now().Format("15:04:05"), "Идет поиск поручителей...")
+		println(curTime(), "Идет поиск поручителей...")
 	} else {
-		println(time.Now().Format("15:04:05"), "Отказ заемщика")
-		sur.OrderStop(id.Id)
+		println(curTime(), "Отказ заемщика")
+		sur.OrderStop(order.Id)
 		os.Exit(0)
 	}
 
 	// проверяем изменение статуса заявки
 	for i := false; i != true; {
-		status, err = sur.OrderStatus(id.Id)
+		status, err = sur.OrderStatus(order.Id)
 		if err.Msg != "" {
-			fmt.Println(time.Now().Format("15:04:05"), "Ошибка на стороне сервера", err)
+			fmt.Println(curTime(), "Ошибка на стороне сервера", err)
 			os.Exit(1)
 		}
 		time.Sleep(3 * time.Second)
 
 		switch status.Status {
 		case 2:
-			println(time.Now().Format("15:04:05"), "Поиск поручителей остановлен заемщиком")
+			println(curTime(), "Поиск поручителей остановлен заемщиком")
 			os.Exit(0)
 			break
 		case 3:
-			println(time.Now().Format("15:04:05"), "Заявка остановлена, по истечению времени, сумма не набрана")
+			println(curTime(), "Заявка остановлена, по истечению времени, сумма не набрана")
 			os.Exit(0)
 			break
 		case 4:
-			println(time.Now().Format("15:04:05"), "Заявка успешно завершена, сумма набрана")
+			println(curTime(), "Заявка успешно завершена, сумма набрана")
 			i = true
 			break
 		}
@@ -157,42 +157,46 @@ func main() {
 
 	// эмулируем случайным образом выдачу займа
 	if success {
-		println(time.Now().Format("15:04:05"), "Заявка оплачена и выдана")
-		err = sur.OrderIssued(id.Id)
+		println(curTime(), "Заявка оплачена и выдана")
+		err = sur.OrderIssued(order.Id)
 		if err.Msg != "" {
-			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderIssued", err)
+			fmt.Println(curTime(), "Ошибка OrderIssued", err)
 		}
 		time.Sleep(2 * time.Second)
 	} else {
-		println(time.Now().Format("15:04:05"), "Отказ заемщика")
-		sur.OrderStop(id.Id)
+		println(curTime(), "Отказ заемщика")
+		sur.OrderStop(order.Id)
 		os.Exit(0)
 	}
-	println(time.Now().Format("15:04:05"), "Ожидание возврата займа")
+	println(curTime(), "Ожидание возврата займа")
 	time.Sleep(5 * time.Second)
 
 	switch gosdk.StringWithCharset(1, intSet) {
 	case "0":
-		err = sur.OrderUnpaid(id.Id)
-		println(time.Now().Format("15:04:05"), "Займ не выплачен")
+		err = sur.OrderUnpaid(order.Id)
+		println(curTime(), "Займ не выплачен")
 		if err.Msg != "" {
-			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderUnpaid", err)
+			fmt.Println(curTime(), "Ошибка OrderUnpaid", err)
 		}
 		break
 	case "1":
-		err = sur.OrderPaid(id.Id)
-		println(time.Now().Format("15:04:05"), "Займ выплачен полностью")
+		err = sur.OrderPaid(order.Id)
+		println(curTime(), "Займ выплачен полностью")
 		if err.Msg != "" {
-			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderPaid", err)
+			fmt.Println(curTime(), "Ошибка OrderPaid", err)
 		}
 		break
 	case "2":
 		sum := rand.Float32() * loan.MaxSum / 2
-		err = sur.OrderPartialPaid(id.Id, sum)
-		fmt.Println(time.Now().Format("15:04:05"), "Займ выплачен частично", sum)
+		err = sur.OrderPartialPaid(order.Id, sum)
+		fmt.Println(curTime(), "Займ выплачен частично", sum)
 		if err.Msg != "" {
-			fmt.Println(time.Now().Format("15:04:05"), "Ошибка OrderPartialPaid", err)
+			fmt.Println(curTime(), "Ошибка OrderPartialPaid", err)
 		}
 		break
 	}
+}
+
+func curTime() string {
+	return time.Now().Format("15:04:05")
 }
