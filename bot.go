@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/SURETLY/GO-SDK"
 	"math/rand"
 	"os"
 	"time"
-	"github.com/SURETLY/GO-SDK"
 )
 
 const intSet = "012"
