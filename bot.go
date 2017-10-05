@@ -11,7 +11,7 @@ import (
 const intSet = "012"
 
 func main() {
-	sur := gosdk.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
+	sur := suretly.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
 
 	println(curTime(), "Получаем лимиты на заявку...")
 	// получили лимиты на заявку
@@ -31,18 +31,18 @@ func main() {
 
 	// отправляем данные для заявкки, получаем id заявки
 	println(curTime(), "Отправляем Suretly данные договора займа...")
-	uid := gosdk.StringWithCharset(16, gosdk.Charset)
-	newOrder := gosdk.OrderNew{
+	uid := suretly.StringWithCharset(16, suretly.Charset)
+	newOrder := suretly.OrderNew{
 		Uid:    uid,
 		Public: true,
-		Borrower: gosdk.Borrower{
-			Name: gosdk.Name{
+		Borrower: suretly.Borrower{
+			Name: suretly.Name{
 				First:  "Антон",
 				Middle: "Викторович",
 				Last:   "Фролов",
 			},
 			Gender: "1",
-			Birth: gosdk.Birth{
+			Birth: suretly.Birth{
 				Date:  623308357,
 				Place: "г.Новосибирск",
 			},
@@ -51,14 +51,14 @@ func main() {
 			Ip:         "109.226.15.42",
 			ProfileUrl: "https://vk.com/frol_nsk",
 			PhotoUrl:   "https://pp.userapi.com/c622420/v622420795/5368/BWdcNhJqFkc.jpg",
-			Passport: gosdk.Passport{
+			Passport: suretly.Passport{
 				Series:     "4431",
 				Number:     "989922",
 				IssueDate:  "25.07.2007",
 				IssuePlace: "Советский, отдел полиции №10, Управление МВД России по г. Новосибирску",
 				IssueCode:  "554-223",
 			},
-			Registration: gosdk.Address{
+			Registration: suretly.Address{
 				Country:  "Россия",
 				Zip:      "630063",
 				Area:     "Новосибирская область",
@@ -68,7 +68,7 @@ func main() {
 				Building: "",
 				Flat:     "24",
 			},
-			Residential: gosdk.Address{
+			Residential: suretly.Address{
 				Country:  "Россия",
 				Zip:      "630063",
 				Area:     "Новосибирская область",
@@ -116,7 +116,7 @@ func main() {
 	time.Sleep(3 * time.Second)
 
 	// эмулируем случайным образом согласие заемщика
-	success := gosdk.StringWithCharset(1, intSet) == "2"
+	success := suretly.StringWithCharset(1, intSet) == "2"
 	if success {
 		println(curTime(), "Заемщик подписал договор")
 		err = sur.ContractAccept(order.Id)
@@ -171,7 +171,7 @@ func main() {
 	println(curTime(), "Ожидание возврата займа")
 	time.Sleep(5 * time.Second)
 
-	switch gosdk.StringWithCharset(1, intSet) {
+	switch suretly.StringWithCharset(1, intSet) {
 	case "0":
 		err = sur.OrderUnpaid(order.Id)
 		println(curTime(), "Займ не выплачен")
