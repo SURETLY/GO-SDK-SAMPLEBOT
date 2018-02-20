@@ -107,6 +107,7 @@ func main() {
 	text, err := sur.ContractGet(order.Id)
 	if err.Msg != "" {
 		fmt.Println("Ошибка ContractGet", err)
+		return
 	}
 	time.Sleep(2 * time.Second)
 	println(text)
