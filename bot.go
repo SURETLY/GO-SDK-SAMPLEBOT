@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/SURETLY/GO-SDK"
 	"math/rand"
 	"os"
 	"time"
+	. "log"
 )
 
 const intSet = "012"
@@ -13,24 +13,24 @@ const intSet = "012"
 func main() {
 	sur := suretly.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
 
-	println(curTime(), "Получаем лимиты на заявку...")
+	Print("Получаем лимиты на заявку...")
 	// получили лимиты на заявку
 	loan, err := sur.Options()
 	if err.Msg != "" {
 		os.Exit(1)
 	}
-	fmt.Println(loan)
-	println(curTime(), "Принимаем заявку на «Микрозайм под поручительство» соответствующую лимитам...")
-	time.Sleep(2 * time.Second)
-	println(curTime(), "Идентифицируем Заемщика...")
-	time.Sleep(2 * time.Second)
+	Print(loan)
+	Print("Принимаем заявку на «Микрозайм под поручительство» соответствующую лимитам...")
+	sleep(2)
+	Print("Идентифицируем Заемщика...")
+	sleep(2)
 
 	// генерим внутренний uid заявки
-	println(curTime(), "Генерим внутренний uid заявки...")
-	time.Sleep(2 * time.Second)
+	Print("Генерим внутренний uid заявки...")
+	sleep(2)
 
 	// отправляем данные для заявкки, получаем id заявки
-	println(curTime(), "Отправляем Suretly данные договора займа...")
+	Print("Отправляем Suretly данные договора займа...")
 	uid := suretly.StringWithCharset(16, suretly.Charset)
 	newOrder := suretly.OrderNew{
 		Uid:    uid,
@@ -87,46 +87,47 @@ func main() {
 		Callback:        "https://anyurl.com/callback",
 	}
 	order, err := sur.OrderNew(newOrder)
-	fmt.Println(curTime(), "id новой заявки:", order.Id)
+	Print("id новой заявки:", order.Id)
 	if err.Msg != "" {
-		fmt.Println("Ошибка OrderNew", err)
+		Print("Ошибка OrderNew", err)
+		return
 	}
-	time.Sleep(1 * time.Second)
+	sleep(1)
 
 	// по id заявки проверяем статус
-	fmt.Println(curTime(), "Проверяем статус новой заявки")
-	time.Sleep(2 * time.Second)
+	Print("Проверяем статус новой заявки")
+	sleep(2)
 	status, err := sur.OrderStatus(order.Id)
-	fmt.Println(curTime(), "Статус новой заявки:", status)
+	Print("Статус новой заявки:", status)
 	if err.Msg != "" {
-		fmt.Println("Ошибка OrderStatus", err)
+		Print("Ошибка OrderStatus", err)
 	}
 
 	// и выгружаем договор по данной заявке
-	fmt.Println(curTime(), "Получаем договор для заемщика")
+	Print("Получаем договор для заемщика")
 	text, err := sur.ContractGet(order.Id)
 	if err.Msg != "" {
-		fmt.Println("Ошибка ContractGet", err)
+		Print("Ошибка ContractGet", err)
 		return
 	}
-	time.Sleep(2 * time.Second)
+	sleep(2)
 	println(text)
-	time.Sleep(5 * time.Second)
+	sleep(5)
 
-	fmt.Println(curTime(), "Ожидаем подтверждение от заемщика")
-	time.Sleep(3 * time.Second)
+	Print("Ожидаем подтверждение от заемщика")
+	sleep(3)
 
 	// эмулируем случайным образом согласие заемщика
 	success := suretly.StringWithCharset(1, intSet) == "2"
 	if success {
-		println(curTime(), "Заемщик подписал договор")
+		Print("Заемщик подписал договор")
 		err = sur.ContractAccept(order.Id)
 		if err.Msg != "" {
-			fmt.Println("Ошибка ContractAccept", err)
+			Print("Ошибка ContractAccept", err)
 		}
-		println(curTime(), "Идет поиск поручителей...")
+		Print("Идет поиск поручителей...")
 	} else {
-		println(curTime(), "Отказ заемщика")
+		Print("Отказ заемщика")
 		sur.OrderStop(order.Id)
 		os.Exit(0)
 	}
@@ -135,22 +136,22 @@ func main() {
 	for i := false; i != true; {
 		status, err = sur.OrderStatus(order.Id)
 		if err.Msg != "" {
-			fmt.Println(curTime(), "Ошибка на стороне сервера", err)
+			Print("Ошибка на стороне сервера", err)
 			os.Exit(1)
 		}
-		time.Sleep(3 * time.Second)
+		sleep(3)
 
 		switch status.Status {
 		case 2:
-			println(curTime(), "Поиск поручителей остановлен заемщиком")
+			Print("Поиск поручителей остановлен заемщиком")
 			os.Exit(0)
 			break
 		case 3:
-			println(curTime(), "Заявка остановлена, по истечению времени, сумма не набрана")
+			Print("Заявка остановлена, по истечению времени, сумма не набрана")
 			os.Exit(0)
 			break
 		case 4:
-			println(curTime(), "Заявка успешно завершена, сумма набрана")
+			Print("Заявка успешно завершена, сумма набрана")
 			i = true
 			break
 		}
@@ -158,46 +159,46 @@ func main() {
 
 	// эмулируем случайным образом выдачу займа
 	if success {
-		println(curTime(), "Заявка оплачена и выдана")
+		Print("Заявка оплачена и выдана")
 		err = sur.OrderIssued(order.Id)
 		if err.Msg != "" {
-			fmt.Println(curTime(), "Ошибка OrderIssued", err)
+			Print("Ошибка OrderIssued", err)
 		}
-		time.Sleep(2 * time.Second)
+		sleep(2)
 	} else {
-		println(curTime(), "Отказ заемщика")
+		Print("Отказ заемщика")
 		sur.OrderStop(order.Id)
 		os.Exit(0)
 	}
-	println(curTime(), "Ожидание возврата займа")
-	time.Sleep(5 * time.Second)
+	Print("Ожидание возврата займа")
+	sleep(5)
 
 	switch suretly.StringWithCharset(1, intSet) {
 	case "0":
 		err = sur.OrderUnpaid(order.Id)
-		println(curTime(), "Займ не выплачен")
+		Print("Займ не выплачен")
 		if err.Msg != "" {
-			fmt.Println(curTime(), "Ошибка OrderUnpaid", err)
+			Print("Ошибка OrderUnpaid", err)
 		}
 		break
 	case "1":
 		err = sur.OrderPaid(order.Id)
-		println(curTime(), "Займ выплачен полностью")
+		Print("Займ выплачен полностью")
 		if err.Msg != "" {
-			fmt.Println(curTime(), "Ошибка OrderPaid", err)
+			Print("Ошибка OrderPaid", err)
 		}
 		break
 	case "2":
 		sum := rand.Float32() * loan.MaxSum / 2
 		err = sur.OrderPartialPaid(order.Id, sum)
-		fmt.Println(curTime(), "Займ выплачен частично", sum)
+		Print("Займ выплачен частично", sum)
 		if err.Msg != "" {
-			fmt.Println(curTime(), "Ошибка OrderPartialPaid", err)
+			Print("Ошибка OrderPartialPaid", err)
 		}
 		break
 	}
 }
 
-func curTime() string {
-	return time.Now().Format("15:04:05")
+func sleep(t int) {
+	time.Sleep(time.Duration(t) * time.Second)
 }
