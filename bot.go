@@ -118,7 +118,7 @@ func main() {
 	sleep(3)
 
 	// эмулируем случайным образом согласие заемщика
-	success := suretly.StringWithCharset(1, intSet) == "2"
+	success := rand.Intn(100) > 30
 	if success {
 		Print("Заемщик подписал договор")
 		err = sur.ContractAccept(order.Id)
@@ -142,15 +142,15 @@ func main() {
 		sleep(3)
 
 		switch status.Status {
-		case 2:
+		case suretly.ORDER_STATUS_CANCELED:
 			Print("Поиск поручителей остановлен заемщиком")
 			os.Exit(0)
 			break
-		case 3:
+		case suretly.ORDER_STATUS_TIMEOUT:
 			Print("Заявка остановлена, по истечению времени, сумма не набрана")
 			os.Exit(0)
 			break
-		case 4:
+		case suretly.ORDER_STATUS_DONE:
 			Print("Заявка успешно завершена, сумма набрана")
 			i = true
 			break
@@ -173,22 +173,22 @@ func main() {
 	Print("Ожидание возврата займа")
 	sleep(5)
 
-	switch suretly.StringWithCharset(1, intSet) {
-	case "0":
+	switch rand.Intn(2) {
+	case 0:
 		err = sur.OrderUnpaid(order.Id)
 		Print("Займ не выплачен")
 		if err.Msg != "" {
 			Print("Ошибка OrderUnpaid", err)
 		}
 		break
-	case "1":
+	case 1:
 		err = sur.OrderPaid(order.Id)
 		Print("Займ выплачен полностью")
 		if err.Msg != "" {
 			Print("Ошибка OrderPaid", err)
 		}
 		break
-	case "2":
+	case 2:
 		sum := rand.Float32() * loan.MaxSum / 2
 		err = sur.OrderPartialPaid(order.Id, sum)
 		Print("Займ выплачен частично", sum)
