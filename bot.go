@@ -87,11 +87,13 @@ func main() {
 		Callback:        "https://anyurl.com/callback",
 	}
 	order, err := sur.OrderNew(newOrder)
-	Print("id новой заявки:", order.Id)
 	if err.Msg != "" {
 		Print("Ошибка OrderNew", err)
 		return
 	}
+
+	Print("id новой заявки:", order.Id)
+
 	sleep(1)
 
 	// по id заявки проверяем статус
