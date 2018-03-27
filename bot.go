@@ -8,8 +8,6 @@ import (
 	. "log"
 )
 
-const intSet = "012"
-
 func main() {
 	sur := suretly.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
 
@@ -80,8 +78,8 @@ func main() {
 			},
 		},
 		UserCreditScore: 678,
-		LoanSum:         rand.Float32() * loan.MaxSum / 2,
-		LoanTerm:        rand.Intn(loan.MaxTerm) / 2,
+		LoanSum:         5123,
+		LoanTerm:        1000,
 		LoanRate:        38.1,
 		CurrencyCode:    "RUB",
 		Callback:        "https://anyurl.com/callback",
@@ -147,15 +145,12 @@ func main() {
 		case suretly.ORDER_STATUS_CANCELED:
 			Print("Поиск поручителей остановлен заемщиком")
 			os.Exit(0)
-			break
 		case suretly.ORDER_STATUS_TIMEOUT:
 			Print("Заявка остановлена, по истечению времени, сумма не набрана")
 			os.Exit(0)
-			break
 		case suretly.ORDER_STATUS_DONE:
 			Print("Заявка успешно завершена, сумма набрана")
 			i = true
-			break
 		}
 	}
 
@@ -182,14 +177,12 @@ func main() {
 		if err.Msg != "" {
 			Print("Ошибка OrderUnpaid", err)
 		}
-		break
 	case 1:
 		err = sur.OrderPaid(order.Id)
 		Print("Займ выплачен полностью")
 		if err.Msg != "" {
 			Print("Ошибка OrderPaid", err)
 		}
-		break
 	case 2:
 		sum := rand.Float32() * loan.MaxSum / 2
 		err = sur.OrderPartialPaid(order.Id, sum)
@@ -197,7 +190,6 @@ func main() {
 		if err.Msg != "" {
 			Print("Ошибка OrderPartialPaid", err)
 		}
-		break
 	}
 }
 
