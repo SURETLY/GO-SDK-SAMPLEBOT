@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	sur := suretly.NewDemo("59d25e8bcea0995959de2da9", "gobot123123123")
+	sur := suretly.NewDemo("59ca100acea0997574cef785", "317")
 
 	Print("Получаем лимиты на заявку...")
 	// получили лимиты на заявку
@@ -41,7 +41,7 @@ func main() {
 			},
 			Gender: "1",
 			Birth: suretly.Birth{
-				Date:  623308357,
+				Date:  "01.04.1981",
 				Place: "г.Новосибирск",
 			},
 			Email:      "frolov_11123@mail.ru",
@@ -49,22 +49,23 @@ func main() {
 			Ip:         "109.226.15.42",
 			ProfileUrl: "https://vk.com/frol_nsk",
 			PhotoUrl:   "https://pp.userapi.com/c622420/v622420795/5368/BWdcNhJqFkc.jpg",
-			Passport: suretly.Passport{
-				Series:     "4431",
-				Number:     "989922",
-				IssueDate:  "25.07.2007",
-				IssuePlace: "Советский, отдел полиции №10, Управление МВД России по г. Новосибирску",
-				IssueCode:  "554-223",
-			},
-			Registration: suretly.Address{
-				Country:  "Россия",
-				Zip:      "630063",
-				Area:     "Новосибирская область",
-				City:     "Новосибирск",
-				Street:   "Труженников",
-				House:    "22",
-				Building: "",
-				Flat:     "24",
+			IdentityDocumentType: suretly.IdentityTypePassportRF,
+			IdentityDocument: suretly.IdentityDocument{
+				"series":     "4431",
+				"number":     "989922",
+				"issue_date":  "25.07.2007",
+				"issue_place": "Советский, отдел полиции №10, Управление МВД России по г. Новосибирску",
+				"issue_code":  "554-223",
+				"registration": suretly.Address{
+					Country:  "Россия",
+					Zip:      "630063",
+					Area:     "Новосибирская область",
+					City:     "Новосибирск",
+					Street:   "Труженников",
+					House:    "22",
+					Building: "",
+					Flat:     "24",
+				},
 			},
 			Residential: suretly.Address{
 				Country:  "Россия",
